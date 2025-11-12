@@ -1,0 +1,25 @@
+{
+	"extends": "@my/config/tsconfig.base.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		"allowJs": true,
+		"noEmit": true,
+		"incremental": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"jsx": "preserve",
+		"module": "ESNext",
+		"lib": ["ES2023", "DOM"]
+	},
+	"include": [".", ".next/types/**/*.ts"],
+	"exclude": ["node_modules"]
+}

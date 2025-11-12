@@ -1,0 +1,45 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.3/schema.json",
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/.next/**",
+      "!**/dist/**",
+      "!**/coverage/**",
+      "!**/build/**",
+      "!**/.turbo/**",
+      "!**/public/**",
+      "!**/src/generated/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "indentWidth": 4,
+    "lineWidth": 150
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "error"
+      },
+      "style": {
+        "useConst": "warn",
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noConsole": "warn"
+      },
+      "a11y": {
+        "useValidAriaProps": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true
+  }
+}

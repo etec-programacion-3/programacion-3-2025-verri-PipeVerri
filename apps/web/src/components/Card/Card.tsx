@@ -1,0 +1,114 @@
+import { faBars, faPen } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type React from "react";
+import { useState } from "react";
+import type { Dispatch } from "react";
+import type { BoardAction, BoardState, OriginalCardPlace } from "../CardContainer/reducer";
+import CardEditModal from "../CardEditModal/CardEditModal";
+
+interface BaseCardProps {
+	id: number;
+	state: BoardState;
+	dispatch: Dispatch<BoardAction>;
+}
+type CardProps = BaseCardProps &
+	(
+		| {
+				dragging?: false;
+				originalPlace: OriginalCardPlace; // required here
+				innerRef: (el: HTMLDivElement) => void;
+		  }
+		| {
+				dragging: true;
+				originalPlace: null; // must be null here
+				innerRef?: (el: HTMLDivElement) => void;
+		  }
+	);
+
+/**
+ * A card item rendered inside a CardContainer. Supports drag and drop.
+ * @param id - Card identifier (index into state.cards)
+ * @param state - Entire board state
+ * @param dispatch - Reducer dispatch for board state
+ * @param dragging - Whether this visual instance is the dragged clone
+ * @param originalPlace - Origin container and index where the card was before dragging
+ * @param innerRef - If provided, used as a ref to the card's div (for measurements)
+ */
+export default function Card({ id, state, dispatch, dragging = false, originalPlace, innerRef = (_el) => {} }: CardProps) {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const placeholder = "Titulo...";
+
+	const handlePress = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (!dragging) {
+			const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+			const offset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+			dispatch({ type: "updateUserActions", param: "mouseOffset", value: offset });
+			dispatch({ type: "updateUserActions", param: "dragging", value: id });
+			dispatch({
+				type: "updateUserActions",
+				param: "originalCardPlace",
+				value: originalPlace,
+			});
+		}
+	};
+
+	const data = state.cards[id];
+	const cardElement = (
+		// biome-ignore lint/a11y/useSemanticElements: The card has button children and should be fully interactive
+		<div
+			className={
+				"bg-white rounded-md shadow-md p-2 border-0 py-3 w-card flex flex-row gap-1 " +
+				(dragging && state.userActions.mouseHoveringTrash ? "opacity-50" : "")
+			}
+			onMouseDown={handlePress}
+			ref={innerRef}
+			role={"button"}
+			tabIndex={0}
+		>
+			<input
+				type="text"
+				value={data.title}
+				onChange={(e) =>
+					dispatch({
+						type: "updateCard",
+						cardId: id,
+						param: "title",
+						value: e.target.value,
+					})
+				}
+				onMouseDown={(e) => {
+					e.stopPropagation();
+				}} // Stop propagation so the parent doesn't start dragging when editing text
+				placeholder={placeholder}
+				className={"overflow-hidden text-ellipsis block w-full"}
+				size={Math.max(placeholder.length, data.title.length)}
+			/>
+			<button
+				className={"bg-green-500 p-2 rounded-lg"}
+				type={"button"}
+				onClick={() => setIsModalOpen(true)}
+				onMouseDown={(e) => {
+					e.stopPropagation();
+				}}
+			>
+				<FontAwesomeIcon icon={faPen} color="white" />
+			</button>
+			<button className={"bg-green-500 p-2 rounded-lg"} data-testid={"drag-button"} type={"button"}>
+				<FontAwesomeIcon icon={faBars} color="white" />
+			</button>
+		</div>
+	);
+
+	return (
+		<>
+			{cardElement}
+			<CardEditModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				state={state}
+				dispatch={dispatch}
+				cardId={id}
+			/>
+		</>
+	);
+}

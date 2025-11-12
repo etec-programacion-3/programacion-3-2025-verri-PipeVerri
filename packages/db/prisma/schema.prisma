@@ -1,0 +1,15 @@
+generator client { // Como generar la interface para interactuar con la DB
+  provider = "prisma-client-js" // Usar el generador para js
+  output = "../src/generated/prisma" // A donde guardar la interface(para luego acceder a ella desde node)
+}
+
+datasource db { // Que db usar
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model Board {
+  id String @id @default(cuid()) // Usar un id random de default
+  title String
+  data Json
+}
